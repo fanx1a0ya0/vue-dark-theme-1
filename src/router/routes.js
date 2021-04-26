@@ -33,6 +33,11 @@ export default [
         name: 'funcs.func1',
         component: () => import('@/views/funcs/func1.vue')
       },
+      {
+        path: '/funcs/detail/:id',
+        name: 'funcs.detail',
+        component: () => import('@/views/funcs/detail.vue')
+      },
       // 功能二
       {
         path: '/funcs/func2',
