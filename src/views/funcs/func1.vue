@@ -1,8 +1,7 @@
 <template>
   <div>
     <blockquote>
-      <svg t="1619348754237" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1177" width="20" height="20"><path d="M927.25551408 262.13793185H96.96293925c-27.37948445 0-49.56463408-21.73610667-49.56463407-48.54518518s22.19728592-48.54518518 49.56463407-48.54518519h830.29257483c27.37948445 0 49.56463408 21.73610667 49.56463407 48.54518519 0 26.82121482-22.19728592 48.54518518-49.56463407 48.54518518zM927.25551408 837.21633185H96.96293925c-27.37948445 0-49.56463408-21.73610667-49.56463407-48.54518518s22.19728592-48.54518518 49.56463407-48.54518519h830.29257483c27.37948445 0 49.56463408 21.73610667 49.56463407 48.54518519s-22.19728592 48.54518518-49.56463407 48.54518518zM927.25551408 550.29001482H96.96293925c-27.37948445 0-49.56463408-21.73610667-49.56463407-48.54518519s22.19728592-48.54518518 49.56463407-48.54518518h830.29257483c27.37948445 0 49.56463408 21.73610667 49.56463407 48.54518518s-22.19728592 48.54518518-49.56463407 48.54518519z" fill="#666666" p-id="1178"></path></svg>
-      <p class="title">漏洞挖掘与利用</p>
+      <i class="fas fa-list"></i><p class="title">漏洞挖掘与利用</p>
     </blockquote>
     <el-row class="task-button">
       <el-button type="primary" @click="dialogVisible = true">新建任务</el-button>
@@ -56,7 +55,7 @@
         <el-table-column
           label="操作">
           <template slot-scope="scope">
-            <el-button type="primary" @click="runTask(scope.row)">运行</el-button>
+            <el-button type="primary" @click="goTaskDetail(scope.row)">运行</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -65,10 +64,8 @@
 </template>
 
 <style scoped>
-  .icon {
-    margin-right: 10px;
-  }
   .title {
+    margin-left: 10px;
     display: inline;
   }
   .task-button {
@@ -76,18 +73,22 @@
   }
 </style>
 <script>
-import { upload } from '@/api/task'
+import { upload, submit, fetchTaskList } from '@/api/task'
 
 export default {
   data() {
     return {
       dialogVisible: false,
+      // 当前要提交的task的表单信息
       form: {
         name: ''
       },
       fileList: [],
+      // 上传完文件回传的文件存储链接
       fileLink: '',
+      // 完整的task结构
       currentTask: {
+        id: '',
         taskName: '',
         releaseTime: '',
         filename: '',
@@ -98,6 +99,9 @@ export default {
       taskList: []
     }
   },
+  mounted: function() {
+    this.fetchTaskList()
+  },
   methods: {
     showMessage(message, type) {
       this.$message({
@@ -105,14 +109,20 @@ export default {
         type
       })
     },
+    fetchTaskList() {
+      // 获取所有的task
+      fetchTaskList().then((response) => {
+        this.taskList = response.data
+      }).catch(() => {
+        this.showMessage('任务列表获取失败', 'error')
+      })
+    },
     uploadChange(file, fileList) {
+      // 拿到要上传的文件
       this.fileList = fileList
     },
-    uploadFail(message) {
-      this.showMessage(message, 'error')
-    },
     uploadSuccess(data) {
-      // data存着url
+      // 上传文件后回传的文件存储链接
       this.fileLink = data
     },
     uploadFile() {
@@ -120,41 +130,41 @@ export default {
       formData.append('file', this.fileList[0].raw)
 
       upload(formData).then((response) => {
-        console.log(response)
-        if (response.code === 20000) {
-          this.uploadSuccess(response.data)
-        } else {
-          this.uploadFail('文件上传失败')
-        }
+        this.uploadSuccess(response.data)
       }).catch(() => {
-        this.uploadFail('服务器异常')
+        this.showMessage('文件上传失败', 'error')
       })
     },
     submitTask() {
       const name = this.fileList[0].raw.name
-      console.log(name)
+
       this.currentTask = {
+        id: '',
         taskName: this.form.name,
-        releaseTime: new Date().toLocaleString(),
+        releaseTime: new Date().toISOString(),
         filename: name.substring(0, name.lastIndexOf('.')),
-        // data存url
         fileLink: this.fileLink,
         fileType: name.substring(name.lastIndexOf('.')),
         taskStatus: '待完成'
       }
-      this.taskList.push(this.currentTask)
-      this.resetAndShow()
+      submit(this.currentTask).then((response) => {
+        // 回填一个主键id
+        this.currentTask.id = response.data.id
+        this.taskList.push(this.currentTask)
+        this.resetAndShow()
+      }).catch(() => {
+        this.showMessage('服务器异常', 'error')
+      })
     },
     resetAndShow() {
-      console.log(this.taskList)
       this.form = {}
       this.fileList = []
       this.currentTask = {}
       this.dialogVisible = false
       this.showMessage('任务提交成功', 'success')
     },
-    runTask(task) {
-      console.log(task)
+    goTaskDetail(task) {
+      this.$router.push({ name: 'funcs.detail', query: { id: task.id }})
     }
   }
 }
