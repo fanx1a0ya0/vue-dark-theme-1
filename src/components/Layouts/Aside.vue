@@ -22,7 +22,7 @@
           </template>
           <el-menu-item index="funcs.func1" :route="{name: 'funcs.func1'}">漏洞挖掘与利用</el-menu-item>
           <el-menu-item index="funcs.func2" :route="{name: 'funcs.func2'}">功能二</el-menu-item>
-          <el-menu-item index="funcs.func3" :route="{name: 'funcs.func3'}">功能三</el-menu-item>
+          <el-menu-item index="funcs.func3" :route="{name: 'funcs.func3'}">密码生成对比</el-menu-item>
           <el-menu-item index="funcs.func4" :route="{name: 'funcs.func4'}">功能四</el-menu-item>
         </el-submenu>
       </el-menu-item-group>
