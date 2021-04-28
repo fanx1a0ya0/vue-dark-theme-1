@@ -18,7 +18,7 @@ export function stopLog(data) {
 
 export function submit(data) {
     return request({
-      url: '/task/submit',
+      url: '/compare/submit',
       method: 'post',
       data
     })

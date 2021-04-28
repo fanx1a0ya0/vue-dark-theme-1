@@ -45,7 +45,7 @@
 </template>
 
 <script>
-import { fetchLog, stopLog } from '@/api/compare'
+import { fetchLog, stopLog, submit } from '@/api/compare'
 
 export default {
   data() {
@@ -61,7 +61,8 @@ export default {
       timer: '',
       lineTimer: '',
       hit: 0,
-      beginTime:''
+      beginTime:'',
+      id: 0
     }
   },
   //mounted(){
@@ -110,12 +111,14 @@ export default {
         this.runTime = this.msToTime(time)
       }, 1000)
     },
+    submit(){
+      submit().then((response) => {
+        return this.id = response.data.id
+      })
+    },
     fetchLog() {
-      const data = {
-        // 需要一个任务的id
-        id: 1
-      }
-      fetchLog(data).then((response) => {
+      fetchLog(this.submit()).then((response) => {
+        console.log(this.id)
         this.log += '\n' + response.data.log
         this.tableData1 = response.data.tableData1
         this.tableData2 = response.data.tableData2
@@ -126,10 +129,8 @@ export default {
       }).catch(() => {})
     },
     stopLog() {
-      const data ={
-        id: 1
-      }
-      stopLog(data).then((response) => {
+      stopLog(this.submit()).then((response) => {
+        console.log(this.id)
         this.log += '\n' + response.data.log
       }).catch(() => {})
     },

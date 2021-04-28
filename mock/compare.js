@@ -70,7 +70,7 @@ module.exports = [
     }
 },
 {
-    url: '/task/submit',
+    url: '/compare/submit',
     type: 'post',
     response: data => {
       return {
@@ -81,5 +81,5 @@ module.exports = [
         }
       }
     }
-  },
+}
 ]
